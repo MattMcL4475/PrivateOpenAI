@@ -13,7 +13,7 @@ namespace PrivateOpenAI
         private CancellationTokenSource tokenSource = new CancellationTokenSource();
         private long requestId = 0;
 
-        private static GptClient client;
+        private static GptClient? client;
 
         public formMain(string azureOpenAiResourceName, string keyvaultName, string modelDeploymentName)
         {

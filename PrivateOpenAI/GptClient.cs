@@ -8,10 +8,9 @@ namespace PrivateOpenAI
 {
     public class GptClient
     {
-        private OpenAIClient client;
+        private OpenAIClient? client;
         private bool isInitialized;
 
-        public string ModelName { get; set; }
         public string AzureOpenAiResourceName { get; set; }
         public string KeyvaultName { get; set; }
         public string ModelDeploymentName { get; set; }
@@ -71,8 +70,7 @@ namespace PrivateOpenAI
             var sw = Stopwatch.StartNew();
             var response = await client.GetChatCompletionsAsync(chatCompletionsOptions, cancellationToken);
             ResponseTime(this, sw.Elapsed);
-            var responseMessage = response.Value.Choices[0].Message;
-            return responseMessage.Content;
+            return response.Value.Choices.First().Message.Content;
         }
     }
 }

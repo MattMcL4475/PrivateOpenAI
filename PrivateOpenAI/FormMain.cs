@@ -9,22 +9,21 @@ namespace PrivateOpenAI
     /// </summary>
     public partial class formMain : Form
     {
-        private const string azureOpenAiResourceName = "";
-        private const string keyvaultName = "";
-        private const string modelDeploymentName = "";
         private Utility utility = new();
         private CancellationTokenSource tokenSource = new CancellationTokenSource();
         private long requestId = 0;
 
         private static GptClient client;
 
-        public formMain()
+        public formMain(string azureOpenAiResourceName, string keyvaultName, string modelDeploymentName)
         {
             InitializeComponent();
             utility.UpdateControlProperty(labelStatus, "Text", $"Authenticating with Azure...");
-            client = new GptClient(azureOpenAiResourceName, keyvaultName, modelDeploymentName, "You are an expert software engineer.");
+            client = new GptClient();
             client.InitializationFailed += Client_InitializationFailed;
             client.ResponseTime += Client_ResponseTime;
+            client.InitializeAsync(azureOpenAiResourceName, keyvaultName, modelDeploymentName, "You are an expert software engineer.")
+                .ContinueWith(t => utility.UpdateControlProperty(labelStatus, "Text", $"Ready."));
         }
 
         private void Client_ResponseTime(object? sender, TimeSpan e)

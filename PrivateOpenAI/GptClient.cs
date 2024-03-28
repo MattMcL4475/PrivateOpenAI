@@ -20,36 +20,32 @@ namespace PrivateOpenAI
         public event EventHandler<string> InitializationFailed = delegate { };
         public event EventHandler<TimeSpan> ResponseTime = delegate { };
 
-        public GptClient(string azureOpenAiResourceName, string keyvaultName, string modelDeploymentName, string systemMessage = null)
+        public async Task InitializeAsync(string azureOpenAiResourceName, string keyvaultName, string modelDeploymentName, string systemMessage = null)
         {
             AzureOpenAiResourceName = azureOpenAiResourceName;
             KeyvaultName = keyvaultName;
             ModelDeploymentName = modelDeploymentName;
             SystemMessage = systemMessage;
 
-            _ = Task.Run(async () =>
+            try
             {
-                try
+                string key = "";
+
+                if (string.IsNullOrWhiteSpace(key))
                 {
-                    string key = "";
-
-                    if (string.IsNullOrWhiteSpace(key))
-                    {
-                        var secretClient = new SecretClient(new Uri($"https://{keyvaultName}.vault.azure.net/"), new DefaultAzureCredential());
-                        var secret = await secretClient.GetSecretAsync(azureOpenAiResourceName);
-                        key = secret.Value.Value;
-                    }
-
-                    client = new OpenAIClient(new Uri($"https://{azureOpenAiResourceName}.openai.azure.com/"), new AzureKeyCredential(key));
-                    isInitialized = true;
+                    var secretClient = new SecretClient(new Uri($"https://{keyvaultName}.vault.azure.net/"), new DefaultAzureCredential());
+                    var secret = await secretClient.GetSecretAsync(azureOpenAiResourceName);
+                    key = secret.Value.Value;
                 }
-                catch (Exception exc)
-                {
-                    InitializationFailed(this, exc.Message);
-                    Debugger.Break();
-                }
-            });
 
+                client = new OpenAIClient(new Uri($"https://{azureOpenAiResourceName}.openai.azure.com/"), new AzureKeyCredential(key));
+                isInitialized = true;
+            }
+            catch (Exception exc)
+            {
+                InitializationFailed(this, exc.Message);
+                Debugger.Break();
+            }
         }
 
         public async Task<string> GptAsync(string prompt, float temperature = 1.0f, CancellationToken cancellationToken = default)

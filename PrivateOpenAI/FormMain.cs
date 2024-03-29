@@ -34,6 +34,12 @@ namespace PrivateOpenAI
         private void Client_InitializationFailed(object? sender, string e)
         {
             MessageBox.Show($"Auth failed: {e}");
+
+            // reset config
+            Properties.Settings.Default.AzureOpenAiResourceName = null;
+            Properties.Settings.Default.KeyvaultName = null;
+            Properties.Settings.Default.ModelDeploymentName = null;
+            Properties.Settings.Default.Save();
             Environment.Exit(1);
         }
 
